@@ -1,0 +1,24 @@
+/dts-v1/;
+/plugin/;
+
+/*
+ * Vendor RK3326 top GPU step: NPLL 1040 MHz, 520 MHz at 1175 mV.
+ * Only for boards whose vdd_logic allows 1175 mV (clocks.sh shows the limits).
+ */
+&cru {
+	assigned-clocks = <&cru 4>,		/* PLL_NPLL */
+		<&cru 171>, <&cru 176>,	/* ACLK_BUS_PRE, ACLK_PERI_PRE */
+		<&cru 240>, <&cru 245>,	/* HCLK_BUS_PRE, HCLK_PERI_PRE */
+		<&cru 320>, <&cru 73>;	/* PCLK_BUS_PRE, SCLK_GPU */
+	assigned-clock-rates = <1040000000>,
+		<200000000>, <200000000>,
+		<150000000>, <150000000>,
+		<100000000>, <200000000>;
+};
+
+&gpu_opp_table {
+	opp-520000000 {
+		opp-hz = /bits/ 64 <520000000>;
+		opp-microvolt = <1175000>;
+	};
+};
