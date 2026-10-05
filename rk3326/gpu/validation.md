@@ -14,7 +14,7 @@ R36S clone (HG36 panel 640×480), ROCKNIX `rk3326-gameconsole-eeclone`, with DDR
 | 480 MHz | 480 MHz | usb480m | 1125 mV |
 | 520 MHz | 520 MHz | npll | 1175 mV |
 
-Also 480→520, 520→480, 480→400 and 400→520 directly: exact.
+Also 480→520, 520→480, 480→400 and 400→520 directly: exact. The eeclone's 1.0 V `vdd_logic` minimum ([design.md](design.md#vdd_logic-at-least-10-v-on-the-eeclone)) removes the 200 and 300 MHz rows; the rest are unchanged.
 
 ## Performance
 
@@ -37,6 +37,8 @@ Idle: 200 MHz at 950 mV instead of 480 MHz at 1150 mV.
 | glmark2 looping, GPU and DDR both `simple_ondemand` for 2 min (630 GPU, 360 DDR transitions; GPU reaches 520) | no hang, no kbase errors |
 | first attempt, split clock tree with `CLK_SET_RATE_PARENT` on the dividers, same ondemand load | **SoC hung** — see [design.md](design.md#one-composite-as-the-vendor-kernel-has-it) |
 
+Re-run with the 1.0 V minimum (GPU 400–520 MHz): 549 random changes and 493 GPU / 439 DDR `simple_ondemand` transitions, no errors.
+
 ## Shared rail
 
 [tools/rail.sh](tools/rail.sh).
@@ -53,6 +55,27 @@ Idle: 200 MHz at 950 mV instead of 480 MHz at 1150 mV.
 GPU pinned at 480 MHz (usb480m), glmark2 looping, state logged every second to `/storage` ([tools/usb480m-test.sh](tools/usb480m-test.sh)); the USB cable unplugged and replugged during the window (re-enumeration in `dmesg` inside it). 118 samples, all `clk_gpu=480000000 src=usb480m`, usb480m enabled throughout, no gap in the log, glmark2 never exited.
 
 ROCKNIX's `powerstate` service resets the GPU governor when the charger is unplugged, which moves the GPU off usb480m; it was stopped for this test so the GPU stayed at 480 MHz.
+
+## Audio
+
+`vdd_logic` set by pinning GPU and DDR, EmulationStation menu, listening while scrolling:
+
+| DDR | GPU | `vdd_logic` | noise | menu sound |
+|---|---|---|---|---|
+| 666 MHz | 200 MHz | 1050 mV | none | |
+| 194 MHz | 200 MHz | 950 mV | yes | delayed |
+| 328 MHz | 200 MHz | 950 mV | yes | delayed |
+| 194 MHz | 480 MHz | 1125 mV | none | immediate, occasional crackle |
+| lowest GPU/DDR OPPs raised to 1.0 V | | ≥ 1000 mV | none | immediate, no crackle |
+
+Forcing the `vdd_logic` buck into PWM mode did not help. CPU pinned, GPU and DDR on `simple_ondemand` at their lowest:
+
+| CPU | `vdd_logic` | noise |
+|---|---|---|
+| 1296 MHz | 1000 mV (vendor bus rule) | none |
+| 816 MHz | 950 mV | yes |
+
+With the 1.0 V minimum: idle at GPU 400 MHz, DDR 194 MHz, 1050 mV; no noise, immediate menu sounds, no crackles.
 
 ## Other
 

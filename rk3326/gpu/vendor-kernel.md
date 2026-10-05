@@ -39,6 +39,28 @@ Stock `rf3536k3ka.dtb`: GPU OPPs 200/300/400/480/520 MHz at the same voltages, `
 
 `mali_kbase_devfreq.c` goes through `dev_pm_opp_set_rate()` with Rockchip's OPP helpers: `rockchip_set_intermediate_rate()`, then `regulator_set_voltage(vdd, u_volt, INT_MAX)` (minimum only) before raising the clock / after lowering it.
 
+## Logic voltage and the CPU clock
+
+Stock `rf3536k3ka.dtb`:
+
+```
+bus_apll: bus-apll {
+        compatible = "rockchip,px30-bus";
+        rockchip,busfreq-policy = "clkfreq";
+        clocks = <&cru PLL_APLL>;
+        clock-names = "bus";
+        operating-points-v2 = <&bus_apll_opp_table>;
+        bus-supply = <&vdd_logic>;
+};
+
+bus_apll_opp_table {
+        opp-1008000000 { opp-microvolt = <950000>; };
+        opp-1512000000 { opp-microvolt = <1000000>; };
+};
+```
+
+The vendor bus driver (`drivers/devfreq/rockchip_bus.c`, "clkfreq" policy) watches APLL and sets `vdd_logic` from this table. The other `vdd_logic` consumers in the vendor dts are the GPU (`mali-supply`) and the DMC (`center-supply`).
+
 ## Other ports
 
 | who | where | approach |

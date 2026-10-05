@@ -69,6 +69,17 @@ kbase asks for exact voltages, `regulator_set_voltage(reg, v, v)`. The DMC drive
 
 The patch makes it ask for `[v, INT_MAX]`, as the vendor kbase does. A higher voltage than the OPP's never hurts the GPU.
 
+## `vdd_logic` at least 1.0 V on the eeclone
+
+With GPU and DDR both scaling down, `vdd_logic` can reach 0.95 V. On the test board that gives audible noise, delayed menu sounds and occasional crackles; at 1.0 V or more they are gone. It depends on the voltage alone, not on the CPU clock: pinned at 816 MHz with `vdd_logic` steady at 0.95 V the noise is there, pinned at 1296 MHz with 1.0 V it is not ([validation.md](validation.md#audio)). With ROCKNIX's single 560 MHz GPU OPP the rail never left 1.15 V, so this never showed.
+
+`rk3326-gameconsole-eeclone.dts` raises `vdd_logic`'s `regulator-min-microvolt` from 950 to 1000 mV. The OPP core then drops the GPU OPPs below that (200 and 300 MHz), so the GPU scales 400–520 MHz on this board; at the same voltage the lower steps would save little.
+
+Not done instead:
+
+- Raising only the lowest GPU OPPs to 1.0 V. kbase sets a voltage only when it changes frequency, and the GPU starts at 200 MHz, so after boot it has requested nothing and the DMC's 0.95 V wins (observed).
+- Following the vendor dts's `rockchip,px30-bus` node, which keeps `vdd_logic` at 1.0 V only while the CPU runs above 1008 MHz ([vendor-kernel.md](vendor-kernel.md#logic-voltage-and-the-cpu-clock)). Implemented and tested: the noise stayed whenever the CPU was at or below 1008 MHz.
+
 ## Patches
 
 | file | what |
@@ -77,3 +88,4 @@ The patch makes it ask for `[v, INT_MAX]`, as the vendor kbase does. A higher vo
 | `mali-bifrost/005-devfreq-shared-supply-min-voltage.patch` | kbase: minimum voltage |
 | `rk3326.dtsi` | drop the 560 MHz OPP override |
 | `rk3326-gameconsole-eeclone.dts` | NPLL 1040 MHz, 520 MHz OPP |
+| `rk3326-gameconsole-eeclone.dts` | `vdd_logic` minimum 1.0 V |
