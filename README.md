@@ -21,6 +21,15 @@ ROCKNIX runs the GPU at a fixed 480 MHz and 1.15 V while reporting 560 MHz. With
 - [validation.md](rk3326/gpu/validation.md) — OPPs, performance, stress, USB
 - [tools/](rk3326/gpu/tools/) — test scripts, 520 MHz overlay
 
+## RK3326 / PX30 — CPU frequency scaling
+
+ROCKNIX deletes three of mainline's five CPU OPPs, so the CPU never goes below 1008 MHz and suspend has no low OPP. Restoring them lets the CPU idle at 600–816 MHz with no measurable cost in performance. Changes: [ROCKNIX/distribution #3439](https://github.com/ROCKNIX/distribution/pull/3439).
+
+- [design.md](rk3326/cpu/design.md) — what was deleted, what is restored
+- [vendor-kernel.md](rk3326/cpu/vendor-kernel.md) — vendor table and other ports
+- [validation.md](rk3326/cpu/validation.md) — OPPs, stress, performance, idle, suspend
+- [tools/](rk3326/cpu/tools/) — test scripts
+
 Rockchip's firmware (rkbin) is a binary and is not disassembled here; the interface comes from Rockchip's GPL kernel sources, and what those don't say was established on hardware.
 
 ## License
