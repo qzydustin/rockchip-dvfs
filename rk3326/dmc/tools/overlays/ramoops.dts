@@ -1,0 +1,16 @@
+/dts-v1/;
+/plugin/;
+
+&{/reserved-memory} {
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	ramoops@3e000000 {
+		compatible = "ramoops";
+		reg = <0x0 0x3e000000 0x0 0x100000>;
+		record-size = <0x20000>;
+		console-size = <0x80000>;
+		pmsg-size = <0x20000>;
+		ecc-size = <16>;
+	};
+};

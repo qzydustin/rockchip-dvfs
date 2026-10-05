@@ -1,0 +1,8 @@
+/dts-v1/;
+/plugin/;
+
+/* For boards whose dtb has the dmc node disabled */
+&dmc {
+	center-supply = <&vdd_logic>;
+	status = "okay";
+};
