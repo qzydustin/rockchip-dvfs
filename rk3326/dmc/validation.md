@@ -47,3 +47,29 @@ DMC pinned with `userspace`; 328 MHz stands in for the loader's fixed 332 MHz. C
 | eMMC 12 GiB write/verify (HS200) | concurrent with the 300 MB run | 0 mismatches, 0 MMC errors |
 
 0 completion timeouts in all runs.
+
+## Above 666 MHz
+
+Not part of the driver ([design.md](design.md#opps-194--328--450--528--666-mhz)). Test images with extra OPPs for LPDDR3 boards, on the same board (LPDDR3-1866):
+
+| | 786 MHz, 1.10 V | 924 MHz, 1.15 V |
+|---|---|---|
+| `ROUND_RATE` | exact | exact; 933 MHz, LPDDR3-1866's limit, rounds down to 924 |
+| switch time | 8–14 ms | 8 ms |
+| `memtester 300M` ×2, pinned | ok | ok |
+| `memtester 300M`, all OPPs every 0.3 s | ok, 2034 switches | ok, 2001 switches |
+| `memtester 300M`, 194 ↔ top every 0.3 s | ok, 2381 switches | ok, 2275 switches |
+| `memtester 300M`, next OPP down ↔ top every 0.3 s | ok, 3646 switches (666 ↔ 786) | 2 failures in one of three runs (786 ↔ 924) |
+| `memtester 300M`, `simple_ondemand` | ok | ok |
+
+At 924 MHz glmark2 also crashed once mid-run, and the USB gadget dropped once during 786 ↔ 924 switching.
+
+Performance, CPU pinned at 1296 MHz, DDR pinned, EmulationStation running (hence the lower 666 MHz figures than above):
+
+| | 666 MHz | 786 MHz | 924 MHz |
+|---|---|---|---|
+| standard memcpy | 1455 MB/s | 1784 MB/s (+23 %) | 1813 MB/s (+25 %) |
+| standard memset | 4584 MB/s | 5362 MB/s (+17 %) | 6438 MB/s (+40 %) |
+| NEON LDP/STP copy | 1515 MB/s | 1782 MB/s (+18 %) | 2001 MB/s (+32 %) |
+| random read latency, 64 MB | 224 ns | 210 ns (−6 %) | 197 ns (−12 %) |
+| glmark2-es2 off-screen score | 343 | 359 (+5 %) | crashed |

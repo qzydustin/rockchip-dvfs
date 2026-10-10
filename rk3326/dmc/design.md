@@ -58,7 +58,11 @@ Load comes from the DFI counters (`rockchip-dfi`; PX30's PMUGRF layout matches R
 
 ### OPPs: 194 / 328 / 450 / 528 / 666 MHz
 
-Voltages from the vendor dts (950 mV up to 450, 975 mV at 528, 1050 mV at 666). The vendor table also has 786 MHz at 1.10 V; that is in spec for LPDDR3-1600 and DDR3-1600 but not DDR3-1333, which some of these boards carry, so 666 is the top until more boards are tested. An overlay adding 786 is in [tools/overlays/](tools/overlays/).
+Voltages from the vendor dts (950 mV up to 450, 975 mV at 528, 1050 mV at 666). The vendor table also has 786 MHz at 1.10 V; that is in spec for LPDDR3-1600 and DDR3-1600 but not DDR3-1333, which some of these boards carry. On the test board 786 MHz passed every test but added only 5 % in glmark2 over 666, so 666 stays the top; 924 MHz gave memory errors ([validation.md](validation.md#above-666-mhz)). An overlay adding 786 is in [tools/overlays/](tools/overlays/).
+
+### Governor across suspend
+
+ROCKNIX's RK3326 sleep hooks put the DMC on `powersave` before suspend and, after resume, derived its governor from the CPU governor's name, which left it on `powersave` for some CPU governors. The hooks now save the DMC governor before suspend and restore it afterwards (`simple_ondemand` if none was saved). Observed: back to `simple_ondemand` within seconds of resume.
 
 ### Firmware
 

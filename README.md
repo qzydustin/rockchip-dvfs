@@ -4,12 +4,12 @@ Design notes and tools for frequency scaling on Rockchip SoCs running the upstre
 
 ## RK3326 / PX30 — DDR frequency scaling
 
-On the upstream kernel the DDR runs at a fixed 333 MHz. This driver lets it scale from 194 MHz at idle to 666 MHz under load, which doubles memory bandwidth, cuts latency by a third and raises the glmark2 score by 38 %. The frequency change itself is done by Rockchip's firmware, which is already on the device; the driver only asks for it. Driver: [ROCKNIX/distribution #3437](https://github.com/ROCKNIX/distribution/pull/3437).
+On the upstream kernel the DDR runs at a fixed 333 MHz. This driver lets it scale from 194 MHz at idle to 666 MHz under load, which doubles memory bandwidth, cuts latency by a third and raises the glmark2 score by 38 %. The frequency change itself is done by Rockchip's firmware, which is already on the device; the driver only asks for it. Enabled on the EE clone. Driver: [ROCKNIX/distribution #3437](https://github.com/ROCKNIX/distribution/pull/3437) (merged).
 
 - [design.md](rk3326/dmc/design.md) — how the driver works and why each decision was made
 - [firmware-interface.md](rk3326/dmc/firmware-interface.md) — the BL31 SIP interface
 - [vendor-kernel.md](rk3326/dmc/vendor-kernel.md) — how the vendor kernel does it, other ports
-- [validation.md](rk3326/dmc/validation.md) — performance, stability, display
+- [validation.md](rk3326/dmc/validation.md) — performance, stability, display, and 786/924 MHz
 - [tools/](rk3326/dmc/tools/) — probe module, test scripts, overlays
 
 ## RK3326 / PX30 — GPU frequency scaling
