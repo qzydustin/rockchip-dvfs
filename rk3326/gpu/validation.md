@@ -25,7 +25,7 @@ Also 480→520, 520→480, 480→400 and 400→520 directly: exact. The eeclone'
 | 480 MHz (the fixed rate before) | 311 |
 | 520 MHz | 330 (+6 %) |
 
-Idle: 200 MHz at 950 mV instead of 480 MHz at 1150 mV.
+Idle: 400 MHz at 1050 mV instead of 480 MHz at 1150 mV (200 MHz at 950 mV before the 1.0 V minimum).
 
 ## Stress
 
@@ -38,6 +38,16 @@ Idle: 200 MHz at 950 mV instead of 480 MHz at 1150 mV.
 | first attempt, split clock tree with `CLK_SET_RATE_PARENT` on the dividers, same ondemand load | **SoC hung** — see [design.md](design.md#one-composite-as-the-vendor-kernel-has-it) |
 
 Re-run with the 1.0 V minimum (GPU 400–520 MHz): 549 random changes and 493 GPU / 439 DDR `simple_ondemand` transitions, no errors.
+
+Longer run on the 400–520 MHz table with the DDR scaling, memtester alongside, [tools/stress-resume.sh](tools/stress-resume.sh):
+
+| test | result |
+|---|---|
+| glmark2 looping, a random OPP every 0.05 s for 5 min | 2363 GPU and 1135 DDR transitions |
+| GPU and DDR on `simple_ondemand`, glmark2 started and stopped at random for 5 min | 196 GPU transitions |
+| 10 suspend/resume cycles with glmark2 running into suspend, then a random OPP every 0.05 s for 30 s | about 3,100 changes |
+
+No hang, no kbase or kernel errors, 0 memtester failures. After each resume the DDR governor was back to `simple_ondemand` within seconds.
 
 ## Shared rail
 

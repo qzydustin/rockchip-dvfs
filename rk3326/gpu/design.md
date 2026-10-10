@@ -1,6 +1,6 @@
 # Design
 
-Three changes: the GPU OPP table, the GPU clock tree, and how kbase asks for voltage. Driver: [ROCKNIX/distribution #3438](https://github.com/ROCKNIX/distribution/pull/3438).
+Three changes: the GPU OPP table on the EE clone, the GPU clock tree, and how kbase asks for voltage. Driver: [ROCKNIX/distribution #3438](https://github.com/ROCKNIX/distribution/pull/3438).
 
 ## What was wrong
 
@@ -57,11 +57,11 @@ Mainline sets NPLL to 1188 MHz; the vendor `rk3326.dtsi` sets 1040 for exactly t
 
 ## OPPs
 
-Mainline's `px30.dtsi` table, unchanged: 200/300/400/480 MHz at 950/975/1050/1125 mV. These are the vendor values. 520 MHz at 1175 mV comes from the vendor `rk3326.dtsi`.
+The EE clone gets the vendor values: 400/480 MHz at 1050/1125 mV from mainline's `px30.dtsi` and 520 MHz at 1175 mV from the vendor `rk3326.dtsi`, with NPLL at 1040 MHz. Its `vdd_logic` allows 0.95–1.35 V, as the stock dtb; the 1.0 V minimum below leaves out mainline's 200/300 MHz at 950/975 mV. The board dts deletes ROCKNIX's 560 MHz entry and adds these three.
 
 The vendor kernel lowers voltages per chip from PVTM (`opp-microvolt-L0`…`L3`, down to 1050 mV at 520 MHz). Mainline has no such selection; the default (`L0`, worst bin) is used.
 
-520 MHz and NPLL 1040 MHz are set per board, only on `rk3326-gameconsole-eeclone`: its `vdd_logic` allows 0.95–1.35 V (as the stock dtb). odroid-go, r3xs, xu10 and gameforce-chi limit `vdd_logic` to 1.15 V, as Hardkernel's vendor dts does; there kbase would fail every request for 1175 mV.
+`rk3326.dtsi` and the other boards keep ROCKNIX's single 560 MHz entry. Review preferred not to change boards nobody had tested, and odroid-go, r3xs, xu10 and gameforce-chi limit `vdd_logic` to 1.15 V, as Hardkernel's vendor dts does, so kbase would fail every request for 1175 mV there. With the composite clock their 560 MHz request still gives 480 MHz, now as usb480m / 1 rather than gpll / 2.5: every RK3326 board enables the USB2 PHY, and the integer dividers offer nothing closer (gpll / 3 = 400, npll at 1188 / 3 = 396).
 
 ## `vdd_logic` is shared with the DDR controller
 
@@ -73,7 +73,7 @@ The patch makes it ask for `[v, INT_MAX]`, as the vendor kbase does. A higher vo
 
 With GPU and DDR both scaling down, `vdd_logic` can reach 0.95 V. On the test board that gives audible noise, delayed menu sounds and occasional crackles; at 1.0 V or more they are gone. It depends on the voltage alone, not on the CPU clock: pinned at 816 MHz with `vdd_logic` steady at 0.95 V the noise is there, pinned at 1296 MHz with 1.0 V it is not ([validation.md](validation.md#audio)). With ROCKNIX's single 560 MHz GPU OPP the rail never left 1.15 V, so this never showed.
 
-`rk3326-gameconsole-eeclone.dts` raises `vdd_logic`'s `regulator-min-microvolt` from 950 to 1000 mV. The OPP core then drops the GPU OPPs below that (200 and 300 MHz), so the GPU scales 400–520 MHz on this board; at the same voltage the lower steps would save little.
+`rk3326-gameconsole-eeclone.dts` raises `vdd_logic`'s `regulator-min-microvolt` from 950 to 1000 mV, and its GPU table starts at 400 MHz: 200 and 300 MHz would need less than 1.0 V, and at the same voltage they would save little.
 
 Not done instead:
 
@@ -86,6 +86,5 @@ Not done instead:
 |---|---|
 | `linux/037-px30-gpu-clock-source.patch` | `clk_gpu_src` composite, `clk_gpu` gate, 1040 MHz PLL rate |
 | `mali-bifrost/005-devfreq-shared-supply-min-voltage.patch` | kbase: minimum voltage |
-| `rk3326.dtsi` | drop the 560 MHz OPP override |
-| `rk3326-gameconsole-eeclone.dts` | NPLL 1040 MHz, 520 MHz OPP |
+| `rk3326-gameconsole-eeclone.dts` | NPLL 1040 MHz; the 560 MHz entry replaced by 400/480/520 MHz |
 | `rk3326-gameconsole-eeclone.dts` | `vdd_logic` minimum 1.0 V |
