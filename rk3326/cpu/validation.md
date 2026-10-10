@@ -52,3 +52,17 @@ No difference within the fuel gauge's resolution (readings scatter by ±25 mA). 
 Deep suspend and resume: all four CPUs back, `ondemand` and every OPP working afterwards.
 
 The GKD Pixel2 port (PX30S, LPDDR4, ROCKNIX #2993) reported memory corruption from CPU frequency and voltage changes shortly after resume. [tools/resume.sh](tools/resume.sh) targets that: 10 cycles of RTC wake-up through `systemctl suspend` (ROCKNIX's sleep hooks run), each followed at once by 30 s of a random CPU OPP every 0.05 s with three cores busy and `memtester 64M` running. 268–281 changes per cycle, 0 memtester failures, no kernel errors.
+
+## Overclock
+
+With `boost` on (ROCKNIX's turbo mode), the 1416 MHz turbo OPP on top of the restored table. [tools/boost.sh](tools/boost.sh), 0 memtester failures and no kernel errors in all of it, about 30,000 transitions:
+
+| test | result |
+|---|---|
+| `ondemand`, idle, then `boost` on with all four cores loaded, 100 times | 1416 MHz reached every time |
+| `ondemand` capped at 600 MHz, then cap lifted, `boost` on and all cores loaded at once, 200 times | 600 → 1416 MHz every time |
+| a random OPP including 1416 every 0.05 s for 3 min, three cores busy, memtester | 1504 changes, 257 of them to 1416 |
+| `ondemand` with three cores loaded and idled at random for 3 min, memtester | 4629 transitions |
+| 10 suspend/resume cycles, then 30 s of random OPPs including 1416 after each, memtester | 240–251 changes per cycle |
+
+1296 and 1416 MHz share 1350 mV, so the jump to 1416 is the same 950 → 1350 mV step as 600 → 1296.

@@ -23,6 +23,7 @@ Per-chip `-L0` values equal the defaults on this table. A separate `px30s-cpu0-o
 | who | where | CPU OPPs |
 |---|---|---|
 | mainline | `px30.dtsi` | 600, 816, 1008, 1200, 1296 MHz; `opp-suspend` on 600 |
-| ROCKNIX (before) | `rk3326.dtsi` | 1008, 1296 MHz + 1416 turbo |
+| ROCKNIX | `rk3326.dtsi`, the other boards | 1008, 1296 MHz + 1416 turbo |
+| ROCKNIX EE clone (#3439) | `rk3326-gameconsole-eeclone.dts` | mainline's five + 1416 turbo |
 | ROCKNIX GKD Pixel2 | `rk3326s-gkd-pixel2.dts` | board-local copy of the vendor table (all nine steps), with a comment that the shared table is reduced |
 | kk (AveyondFly) | `distribution_rocknix` `next`, `000-rk3326-dts.patch` | same deletions as ROCKNIX |

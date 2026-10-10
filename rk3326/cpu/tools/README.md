@@ -8,6 +8,6 @@
 | `bench.sh` | device | sustained and burst runs under `ondemand` with the floor at 1008 and at 600 MHz |
 | `resume.sh` | device | suspend/resume cycles by RTC alarm, each followed by random CPU OPPs under load with memtester |
 | `power.sh` | device | battery draw at idle with the floor at 1008 and 600 MHz; unplug USB, logs to `/storage` |
-| `resume.sh` | device | suspend/resume cycles (RTC wake), random OPPs with all cores busy and memtester right after each resume; logs to `/storage` |
+| `boost.sh` | device | transitions with `boost` on: idle-to-1416 jumps, 600-to-1416 jumps, random OPPs including 1416, bursty load, suspend/resume; logs to `/storage` |
 
 ROCKNIX has no `userspace` cpufreq governor; the scripts pin a rate with `performance` and `scaling_max_freq`, or set a floor with `scaling_min_freq`.
